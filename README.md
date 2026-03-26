@@ -23,8 +23,21 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-Download dataset csv locally:
 ```bash
+# Download datasets
 python fetch_data.py --dataset triviaqa
 python fetch_data.py --dataset popqa
+
+# Run inference
+python run_inference.py # testing mode (50 examples), triviaqa, 1.5B defaults
+python run_inference.py --lim 500 # 500 examples
+python run_inference.py --lim 500 --dataset popqa
+python run_inference.py --model Qwen/Qwen2.5-3B-Instruct --quantize
+python run_inference.py --model Qwen/Qwen2.5-7B-Instruct --quantize --lim 500
+
+# Plot theoretical thresholds
+python plot_thresholds.py
+
+# Run tests
+python run_tests.py
 ```
