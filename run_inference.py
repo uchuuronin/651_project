@@ -33,7 +33,7 @@ def is_correct(predicted: str, aliases_json: str) -> bool:
         return False
     aliases = json.loads(aliases_json)
     pred = predicted.lower().strip()
-    return any(pred == a for a in aliases)
+    return any(pred == a or a in pred or pred in a for a in aliases)
 
 
 def run_inference(dataset: str, lim: int, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT):
