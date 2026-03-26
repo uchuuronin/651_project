@@ -1,22 +1,19 @@
 # 651 Project: Empirical Study of Optimal Loss-Aware Abstention Thresholds for LLMs
 # Python 3.10 recommended
-# PyTorch: install separately first based on your CUDA version:
+# PyTorch: install separately first based on CUDA version:
 #   CUDA 12.1: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 #   CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 #
 # Then install the rest:
 #   pip install -r requirements.txt
 
-# HuggingFace + model loading
 transformers>=4.45.0
 accelerate>=0.34.0
 bitsandbytes>=0.43.0
-
-# Datasets
 datasets>=2.20.0
-
-# Core scientific stack
 numpy>=1.26.0
 pandas>=2.2.0
 scipy>=1.13.0
 matplotlib>=3.9.0
+pytest==9.0.2
+requests==2.32.5
