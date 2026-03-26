@@ -1,6 +1,7 @@
 # Generates theoretical threshold figure and reliability diagrams.
 import numpy as np
 import pandas as pd
+import argparse
 import matplotlib.pyplot as plt
 from src.config import RESULTS_DIR, LOGGER
 from src.thresholds import tau_U, tau_B
@@ -62,8 +63,9 @@ def plot_reliability(data_path: str, save_path: str):
         ax.grid(True, alpha=0.3)
         ax.legend(fontsize=9)
 
-    title = data_path.split("/")[-1].replace(".csv", "").replace("_", " ")
-    plt.suptitle(f"Reliability Diagrams for {title}",fontsize=12)
+    parts = data_path.split("/")[-1].replace(".csv", "").split("_")
+    title_dataset, title_lim = parts[1], parts[2]
+    plt.suptitle(f"Reliability Diagrams: Qwen2.5 on {title_dataset} (n={title_lim})", fontsize=12)
     plt.tight_layout()
 
     out_path =RESULTS_DIR/save_path
@@ -72,5 +74,10 @@ def plot_reliability(data_path: str, save_path: str):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lim", type=int, default=500)
+    parser.add_argument("--dataset", choices=["triviaqa", "popqa"], default="triviaqa")
+    args = parser.parse_args()
+
     plot_theoretical("fig_thresholds_theoretical.png")
-    plot_reliability("results/inference_triviaqa_500.csv","fig_reliability_diagram.png")
+    plot_reliability(f"results/inference_{args.dataset}_{args.lim}.csv",f"fig_reliability_{args.dataset}_{args.lim}.png")
