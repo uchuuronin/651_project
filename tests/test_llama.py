@@ -58,10 +58,11 @@ class TestGetTokenProbs:
     def test_empty_answer(self, pipeline):
         assert pipeline._extract_token_probs({}) == (None, None)
 
-    @patch("src.llama_cpp.requests.post")
-    def test_request_fails(self, mock_post, pipeline):
-        mock_post.side_effect = requests.exceptions.ConnectionError
-        assert pipeline._extract_token_probs({}) == (None, None)
+    def test_malformed_data(self, pipeline):
+        # testing missing logprob key
+        assert pipeline._extract_token_probs(
+            {"completion_probabilities": [{"token": "Paris"}]}
+        ) == (None, None)
         
 # python -m pytest tests/test_llama.py -v
         
