@@ -22,21 +22,25 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
+Install llama.cpp separately for inference (refer to https://github.com/ggml-org/llama.cpp#installation)
+
+
 ## Usage
 ```bash
 # Download datasets
 python fetch_data.py --dataset triviaqa
 python fetch_data.py --dataset popqa
 
+# Start llama-server in a separate terminal before running inference:
+llama-server -hf Qwen/Qwen2.5-1.5B-Instruct-GGUF --host 127.0.0.1 --port 4020
+
 # Run inference
 python run_inference.py # testing mode (50 examples), triviaqa, 1.5B defaults
 python run_inference.py --lim 500 # 500 examples
 python run_inference.py --lim 500 --dataset popqa
-python run_inference.py --model Qwen/Qwen2.5-3B-Instruct --quantize
-python run_inference.py --model Qwen/Qwen2.5-7B-Instruct --quantize --lim 500
 
 # Plot theoretical thresholds
-python plot_thresholds.py
+python gen_plots.py  
 
 # Run tests
 python run_tests.py
