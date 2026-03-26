@@ -6,6 +6,7 @@
 import re
 import requests
 from src.config import LOGGER
+import math
 
 
 class LlamaCppPipeline:
@@ -53,35 +54,32 @@ class LlamaCppPipeline:
 
         try:
             resp = requests.post(
-                f"{self.base_url}/completion",
+                f"{self.base_url}/v1/chat/completions",
                 json={
-                    "prompt": prompt,
+                    "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.0,
-                    "n_predict": 60,
-                    "n_probs": 1,
-                    "stream": False,
+                    "max_tokens": 60,
                 },
                 timeout=30,
             )
             resp.raise_for_status()
-            data = resp.json()
-            raw = data.get("content", "").strip()
+            raw = resp.json()["choices"][0]["message"]["content"].strip()
         except Exception as e:
-            LOGGER.warning(f"Completion failed: {e}")
+            LOGGER.warning(f"Chat completion failed: {e}")
             return self._empty_result(question)
 
         answer, verbalized_conf = self._parse_response(raw)
-        token_prob_first, token_prob_mean = self._extract_token_probs(data)
+        token_prob_first, token_prob_mean = self._get_token_probs(answer)
 
         return {
             "question": question,
             "answer_pred": answer,
-            "correct": None,
-            "token_prob_first": token_prob_first,
-            "token_prob_mean": token_prob_mean,
-            "verbalized_conf": verbalized_conf,
+            "correct": None, #evaluated in run_inference.py against aliases
+            "token_prob_first":token_prob_first,
+            "token_prob_mean":token_prob_mean,
+            "verbalized_conf":verbalized_conf,
         }
-        
+
     def _parse_response(self, raw: str) -> tuple[str, float | None]:
         # Splits model output into answer and verbalized confidence.
         conf = None
@@ -96,30 +94,41 @@ class LlamaCppPipeline:
             answer = raw[:match.start()].strip().rstrip(".")
 
         return answer.strip(), conf
-    
-    def _extract_token_probs(self, data: dict) -> tuple[float | None, float | None]:
-        # Reads completion_probabilities from /completion response.
-        # /v1/completions does not return logprobs reliably 
-        import math
-        probs = data.get("completion_probabilities", [])
-        if not probs:
+
+    def _get_token_probs(self, answer: str) -> tuple[float | None, float | None]:
+        # Gets log probabilities for answer tokens via /v1/completions.
+        if not answer:
             return None, None
+
         try:
-            log_probs = [e["logprob"] for e in probs if "logprob" in e]
-            if not log_probs:
+            resp = requests.post(
+                f"{self.base_url}/v1/completions",
+                json={
+                    "prompt": answer,
+                    "max_tokens": 1,
+                    "logprobs": True,
+                    "echo": True,
+                },
+                timeout=15,
+            )
+            resp.raise_for_status()
+            token_logprobs = resp.json()["choices"][0]["logprobs"]["token_logprobs"]
+            valid = [lp for lp in token_logprobs if lp is not None]
+            if not valid:
                 return None, None
-            return math.exp(log_probs[0]), math.exp(sum(log_probs) / len(log_probs))
+            # Convert log-probabilities to probabilities in [0, 1].
+            mean_lp = sum(valid) / len(valid)
+            return float(math.exp(valid[0])), float(math.exp(mean_lp))
         except Exception as e:
             LOGGER.warning(f"Token prob extraction failed: {e}")
-            return None, None    
-
+            return None, None
 
     def _empty_result(self, question: str) -> dict:
         return {
-        "question":question,
-        "answer_pred":None,
-        "correct":None,
-        "token_prob_first":None,
-        "token_prob_mean":None,
-        "verbalized_conf":None,
+            "question": question,
+            "answer_pred":None,
+            "correct":None,
+            "token_prob_first":None,
+            "token_prob_mean":None,
+            "verbalized_conf":None,
         }
