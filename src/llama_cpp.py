@@ -3,16 +3,13 @@
 # Start server before running:
 #  llama-server -hf Qwen/Qwen3-8B-GGUF --host 127.0.0.1 --port 4568
 
-LLAMA_HOST = "127.0.0.1"
-LLAMA_PORT = 4020
-
 import re
 import requests
 from src.config import LOGGER
 
 
 class LlamaCppPipeline:
-    def __init__(self, host: str = LLAMA_HOST, port: int = LLAMA_PORT):
+    def __init__(self, host: str = "127.0.0.1", port: int = 4020):
         self.base_url = f"http://{host}:{port}"
         self._ready = False
 
@@ -25,7 +22,7 @@ class LlamaCppPipeline:
         except requests.exceptions.ConnectionError:
             raise RuntimeError(
                 f"llama-server not reachable at {self.base_url}. "
-                f"Start with: llama-server -hf <model> --host {LLAMA_HOST} --port {LLAMA_PORT}"
+                f"Start with: llama-server -hf <model> --host 127.0.0.1 --port 4020"
             )
 
     def run(self, questions: list[str], n: int | None = None) -> list[dict]:

@@ -10,9 +10,6 @@ DATA_DIR = ROOT_DIR/"data"
 RESULTS_DIR = ROOT_DIR/"results"   
 LOG_DIR = ROOT_DIR/"logs"
 
-TRIVIAQA_DIR = DATA_DIR/"triviaqa"
-POPQA_DIR = DATA_DIR/"popqa"
-
 def csv_path(model_tag: str, dataset: str) -> Path:
     return RESULTS_DIR / f"inference_{model_tag}_{dataset}.csv"
 
@@ -20,7 +17,7 @@ def fig_path(name: str) -> Path:
     return RESULTS_DIR / f"fig_{name}.pdf"
 
 def setup_dirs():
-    for d in [DATA_DIR, RESULTS_DIR, LOG_DIR, TRIVIAQA_DIR, POPQA_DIR]:
+    for d in [DATA_DIR, RESULTS_DIR, LOG_DIR]:
         d.mkdir(parents=True, exist_ok=True)
         
 N_EXAMPLES= 500
