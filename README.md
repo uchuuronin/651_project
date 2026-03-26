@@ -36,11 +36,12 @@ llama-server -hf Qwen/Qwen2.5-1.5B-Instruct-GGUF --host 127.0.0.1 --port 4020
 
 # Run inference
 python run_inference.py # testing mode (50 examples), triviaqa, 1.5B defaults
-python run_inference.py --lim 500 # 500 examples
-python run_inference.py --lim 500 --dataset popqa
+python run_inference.py --lim 1000 # 1000 examples
+python run_inference.py --lim 1000 --dataset popqa
 
 # Plot theoretical thresholds
-python gen_plots.py  
+python gen_plots.py # testing mode (50 examples), triviaqa
+python gen_plots.py --lim 1000 --dataset popqa
 
 # Run tests
 python run_tests.py

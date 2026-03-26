@@ -75,7 +75,7 @@ def plot_reliability(data_path: str, save_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lim", type=int, default=500)
+    parser.add_argument("--lim", type=int, default=50)
     parser.add_argument("--dataset", choices=["triviaqa", "popqa"], default="triviaqa")
     args = parser.parse_args()
 
