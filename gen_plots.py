@@ -10,10 +10,8 @@ def plot_theoretical(save_path: str):
     lam = np.linspace(0.001,0.25,300)
     fig, ax = plt.subplots(figsize=(6, 4))
 
-    ax.plot(lam, tau_U(lam), label=r"$\tau_U(\lambda)= \lambda/(1+\lambda)$",
-            color="tab:blue", linewidth=2)
-    ax.plot(lam, tau_B(lam), label=r"$\tau_B(\lambda)= (1+\sqrt{1-4\lambda})/2$",
-            color="tab:orange", linewidth=2)
+    ax.plot(lam, tau_U(lam), label=r"$\tau_U(\lambda)= \lambda/(1+\lambda)$",color="tab:blue", linewidth=2)
+    ax.plot(lam, tau_B(lam), label=r"$\tau_B(\lambda)= (1+\sqrt{1-4\lambda})/2$",color="tab:orange", linewidth=2)
 
     ax.set_xlabel(r"Abstention cost $\lambda$",fontsize=12)
     ax.set_ylabel(r"Threshold $\tau$",fontsize=12)
@@ -25,7 +23,7 @@ def plot_theoretical(save_path: str):
 
     plt.tight_layout()
 
-    out_path = RESULTS_DIR/save_path
+    out_path =RESULTS_DIR/save_path
     plt.savefig(out_path, bbox_inches="tight")
     LOGGER.info(f"Saved plot_theoretical figure to {out_path}")
 
@@ -54,8 +52,7 @@ def plot_reliability(data_path: str, save_path: str):
             counts.append(mask.sum())
 
         ax.plot([0, 1], [0, 1], "k--", alpha=0.4, label="Perfect calibration")
-        ax.scatter(mean_conf, mean_acc, s=[c * 2 for c in counts],
-                   color="tab:blue", alpha=0.7, zorder=3)
+        ax.scatter(mean_conf, mean_acc, s=[c * 2 for c in counts],color="tab:blue",alpha=0.7,zorder=3)
         ax.plot(mean_conf, mean_acc, color="tab:blue", linewidth=1.5)
         ax.set_xlabel("Mean confidence",fontsize=11)
         ax.set_ylabel("Mean accuracy",fontsize=11)
@@ -69,7 +66,7 @@ def plot_reliability(data_path: str, save_path: str):
     plt.suptitle(f"Reliability Diagrams for {title}",fontsize=12)
     plt.tight_layout()
 
-    out_path = RESULTS_DIR/save_path
+    out_path =RESULTS_DIR/save_path
     plt.savefig(out_path, bbox_inches="tight")
     LOGGER.info(f"Saved plot_reliability figure to {out_path}")
 
