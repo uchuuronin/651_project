@@ -2,8 +2,6 @@ import sys
 import os
 from fetch_data import normalize_answer, extract_aliases
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 class TestNormalizeAnswer:
     def test(self):
         assert normalize_answer("David Seville") == "david seville"

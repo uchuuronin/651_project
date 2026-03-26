@@ -5,8 +5,6 @@ import os
 from unittest.mock import patch
 from src.llama_cpp import LlamaCppPipeline
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 @pytest.fixture
 def pipeline():
     return LlamaCppPipeline(host="127.0.0.1", port=4020) 

@@ -22,8 +22,9 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
-## Running
+## Usage
+Download dataset csv locally:
 ```bash
-python pull_data.py # downloads dataset csv locally
-python run_inference.py # runs interences
+python fetch_data.py --dataset triviaqa
+python fetch_data.py --dataset popqa
 ```
