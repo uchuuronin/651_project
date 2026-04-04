@@ -1,6 +1,6 @@
 data/triviaqa/
 data/popqa/
-logs/
+results/
 models/
 
 # Byte-compiled / optimized / compiled files

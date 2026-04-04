@@ -53,32 +53,35 @@ class LlamaCppPipeline:
 
         try:
             resp = requests.post(
-                f"{self.base_url}/v1/chat/completions",
+                f"{self.base_url}/completion",
                 json={
-                    "messages": [{"role": "user", "content": prompt}],
+                    "prompt": prompt,
                     "temperature": 0.0,
-                    "max_tokens": 60,
+                    "n_predict": 60,
+                    "n_probs": 1,
+                    "stream": False,
                 },
                 timeout=30,
             )
             resp.raise_for_status()
-            raw = resp.json()["choices"][0]["message"]["content"].strip()
+            data = resp.json()
+            raw = data.get("content", "").strip()
         except Exception as e:
-            LOGGER.warning(f"Chat completion failed: {e}")
+            LOGGER.warning(f"Completion failed: {e}")
             return self._empty_result(question)
 
         answer, verbalized_conf = self._parse_response(raw)
-        token_prob_first, token_prob_mean = self._get_token_probs(answer)
+        token_prob_first, token_prob_mean = self._extract_token_probs(data)
 
         return {
             "question": question,
-            "answer": answer,
-            "correct": None, #evaluated in run_inference.py against aliases
-            "token_prob_first":token_prob_first,
-            "token_prob_mean":token_prob_mean,
-            "verbalized_conf":verbalized_conf,
+            "answer_pred": answer,
+            "correct": None,
+            "token_prob_first": token_prob_first,
+            "token_prob_mean": token_prob_mean,
+            "verbalized_conf": verbalized_conf,
         }
-
+        
     def _parse_response(self, raw: str) -> tuple[str, float | None]:
         # Splits model output into answer and verbalized confidence.
         conf = None
@@ -93,39 +96,30 @@ class LlamaCppPipeline:
             answer = raw[:match.start()].strip().rstrip(".")
 
         return answer.strip(), conf
-
-    def _get_token_probs(self, answer: str) -> tuple[float | None, float | None]:
-        # Gets log probabilities for answer tokens via /v1/completions.
-        if not answer:
+    
+    def _extract_token_probs(self, data: dict) -> tuple[float | None, float | None]:
+        # Reads completion_probabilities from /completion response.
+        # /v1/completions does not return logprobs reliably 
+        import math
+        probs = data.get("completion_probabilities", [])
+        if not probs:
             return None, None
-
         try:
-            resp = requests.post(
-                f"{self.base_url}/v1/completions",
-                json={
-                    "prompt": answer,
-                    "max_tokens": 1,
-                    "logprobs": True,
-                    "echo": True,
-                },
-                timeout=15,
-            )
-            resp.raise_for_status()
-            token_logprobs = resp.json()["choices"][0]["logprobs"]["token_logprobs"]
-            valid = [lp for lp in token_logprobs if lp is not None]
-            if not valid:
+            log_probs = [e["logprob"] for e in probs if "logprob" in e]
+            if not log_probs:
                 return None, None
-            return float(valid[0]), float(sum(valid) / len(valid))
+            return math.exp(log_probs[0]), math.exp(sum(log_probs) / len(log_probs))
         except Exception as e:
             LOGGER.warning(f"Token prob extraction failed: {e}")
-            return None, None
+            return None, None    
+
 
     def _empty_result(self, question: str) -> dict:
         return {
-            "question": question,
-            "answer":None,
-            "correct":None,
-            "token_prob_first":None,
-            "token_prob_mean":None,
-            "verbalized_conf":None,
+        "question":question,
+        "answer_pred":None,
+        "correct":None,
+        "token_prob_first":None,
+        "token_prob_mean":None,
+        "verbalized_conf":None,
         }
