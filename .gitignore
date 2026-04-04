@@ -1,4 +1,5 @@
-data/trivia_qa
+data/triviaqa/
+data/popqa/
 logs/
 models/
 
