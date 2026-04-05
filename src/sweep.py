@@ -187,6 +187,70 @@ class AbstractionSweep:
 
         return optimal
 
+    def save_results(self, filepath: str) -> None:
+        """
+        Serialize sweep results to JSON file.
+
+        Args:
+            filepath: Path to save results to
+        """
+        import json
+
+        # Convert numpy arrays to lists for JSON serialization
+        serializable = {}
+        for loss_fn, results in self.results.items():
+            serializable[loss_fn] = {
+                "lambda": results["lambda"].tolist(),
+                "accuracy": results["accuracy"].tolist(),
+                "precision": results["precision"].tolist(),
+                "coverage": results["coverage"].tolist(),
+                "num_abstained": results["num_abstained"].tolist(),
+            }
+
+        with open(filepath, "w") as f:
+            json.dump(
+                {
+                    "loss_functions": self.loss_functions,
+                    "results": serializable,
+                },
+                f,
+                indent=2,
+            )
+
+        logger.info(f"Saved sweep results to {filepath}")
+
+    @classmethod
+    def load_results(cls, filepath: str) -> "AbstractionSweep":
+        """
+        Load sweep results from JSON file.
+
+        Args:
+            filepath: Path to load results from
+
+        Returns:
+            AbstractionSweep instance with loaded results
+        """
+        import json
+
+        with open(filepath, "r") as f:
+            data = json.load(f)
+
+        sweep = cls(loss_functions=data["loss_functions"])
+        results = {}
+
+        for loss_fn, res_dict in data["results"].items():
+            results[loss_fn] = {
+                "lambda": np.array(res_dict["lambda"]),
+                "accuracy": np.array(res_dict["accuracy"]),
+                "precision": np.array(res_dict["precision"]),
+                "coverage": np.array(res_dict["coverage"]),
+                "num_abstained": np.array(res_dict["num_abstained"]),
+            }
+
+        sweep.results = results
+        logger.info(f"Loaded sweep results from {filepath}")
+        return sweep
+
 
 def compute_metrics_from_results(
     results: List[Dict[str, Any]],
