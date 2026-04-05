@@ -33,3 +33,26 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 2026-04-04 21:22:28,926 - __main__ - INFO - Running inference on 500 examples (starting from 0)...
 2026-04-04 21:23:39,330 - __main__ - INFO - Progress: 50/500 (10%) | Avg: 1.41s/ex | ETA: 0.2h remaining
 2026-04-04 21:23:39,337 - __main__ - INFO - Saved checkpoint: 50 completed examples
+2026-04-04 21:24:48,270 - __main__ - INFO - Progress: 100/500 (20%) | Avg: 1.39s/ex | ETA: 0.2h remaining
+2026-04-04 21:24:48,287 - __main__ - INFO - Saved checkpoint: 100 completed examples
+2026-04-04 21:26:08,322 - __main__ - INFO - Progress: 150/500 (30%) | Avg: 1.46s/ex | ETA: 0.1h remaining
+2026-04-04 21:26:08,342 - __main__ - INFO - Saved checkpoint: 150 completed examples
+2026-04-04 21:27:09,533 - __main__ - INFO - Progress: 200/500 (40%) | Avg: 1.40s/ex | ETA: 0.1h remaining
+2026-04-04 21:27:09,541 - __main__ - INFO - Saved checkpoint: 200 completed examples
+2026-04-04 21:28:10,304 - __main__ - INFO - Progress: 250/500 (50%) | Avg: 1.37s/ex | ETA: 0.1h remaining
+2026-04-04 21:28:10,311 - __main__ - INFO - Saved checkpoint: 250 completed examples
+2026-04-04 21:29:11,804 - __main__ - INFO - Progress: 300/500 (60%) | Avg: 1.34s/ex | ETA: 0.1h remaining
+2026-04-04 21:29:11,816 - __main__ - INFO - Saved checkpoint: 300 completed examples
+2026-04-04 21:30:23,328 - __main__ - INFO - Progress: 350/500 (70%) | Avg: 1.36s/ex | ETA: 0.1h remaining
+2026-04-04 21:30:23,333 - __main__ - INFO - Saved checkpoint: 350 completed examples
+2026-04-04 21:31:20,450 - __main__ - INFO - Progress: 400/500 (80%) | Avg: 1.33s/ex | ETA: 0.0h remaining
+2026-04-04 21:31:20,456 - __main__ - INFO - Saved checkpoint: 400 completed examples
+2026-04-04 21:32:29,204 - __main__ - INFO - Progress: 450/500 (90%) | Avg: 1.33s/ex | ETA: 0.0h remaining
+2026-04-04 21:32:29,214 - __main__ - INFO - Saved checkpoint: 450 completed examples
+2026-04-04 21:33:35,449 - __main__ - INFO - Progress: 500/500 (100%) | Avg: 1.33s/ex | ETA: 0.0h remaining
+2026-04-04 21:33:35,461 - __main__ - INFO - Saved checkpoint: 500 completed examples
+2026-04-04 21:33:35,462 - __main__ - INFO - Inference complete. 500 results in 0.19 hours (avg 1.33s per example)
+2026-04-04 21:33:35,473 - __main__ - INFO - Saved 500 results to results/full_500_examples.json
+2026-04-04 21:33:35,474 - __main__ - INFO - Full inference complete: 500 examples
+2026-04-04 21:33:35,474 - __main__ - INFO - Dataset accuracy: 39.8%
+2026-04-04 21:33:35,475 - __main__ - INFO - Removed checkpoint file

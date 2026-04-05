@@ -1,0 +1,37 @@
+[
+  {
+    "question": "Which island in Kent is the second largest of England's isles?",
+    "ground_truth": "Isle of Sheppey",
+    "prediction": "The answer to the question \"Which island in Kent is the second largest of England's islands?\" is:\n\nRye\n\nRye is the second largest island in England's islands, and it is located in the county of Kent. The largest island in England is Thanet, which is also in Kent.",
+    "confidence": 0.65,
+    "prompt": "Context: \n\nQuestion: Which island in Kent is the second largest of England's isles?\n\nAnswer:"
+  },
+  {
+    "question": "\u2018The Night of the Long Knives\u2019 refers to which leader eliminating many of his political enemies?",
+    "ground_truth": "Adolph Hitler",
+    "prediction": "'The Night of the Long Knives' refers to Nazi Germany's leader, Adolf Hitler, eliminating many of his political enemies. This event took place in 1934 and was part of Hitler's purge of opponents within the Nazi Party.",
+    "confidence": 0.5,
+    "prompt": "Context: \n\nQuestion: \u2018The Night of the Long Knives\u2019 refers to which leader eliminating many of his political enemies?\n\nAnswer:"
+  },
+  {
+    "question": "What viral disease is also called infectious parotitis?",
+    "ground_truth": "MUMPS",
+    "prediction": "Infectious mononucleosis, also known as \"kissing disease\" or \"kissing fever,\" is a viral disease that is also called \"infectious parotitis.\"",
+    "confidence": 0.5,
+    "prompt": "Context: \n\nQuestion: What viral disease is also called infectious parotitis?\n\nAnswer:"
+  },
+  {
+    "question": "Which Oscar winning song came from the film Pocahontas",
+    "ground_truth": "Colours of the Wind",
+    "prediction": "The Oscar-winning song that came from the film Pocahontas is \"When'll I See You Again.\" This song was nominated for Best Original Song at the 80th Academy Awards in 1968 and won the award.",
+    "confidence": 0.6125,
+    "prompt": "Context: \n\nQuestion: Which Oscar winning song came from the film Pocahontas\n\nAnswer:"
+  },
+  {
+    "question": "Author Alex Haley, born on Aug 11, 1921, wrote what epic story of his family origins, later to be made a rather popular mini-series?",
+    "ground_truth": "Roots: The Saga of an American Family",
+    "prediction": "The epic story of Alex Haley's family origins that was later made into a popular mini-series is \"Roots.\" It is based on Haley's personal experiences and his discovery of his family's history, which spans back to Africa centuries before his own birth. The mini-series, which aired in the United States in 1977, follows the life of Kunta Kinte, a young man from West Africa who is captured by slave traders and forced into the American slave trade. It is a",
+    "confidence": 0.7571428571428571,
+    "prompt": "Context: \n\nQuestion: Author Alex Haley, born on Aug 11, 1921, wrote what epic story of his family origins, later to be made a rather popular mini-series?\n\nAnswer:"
+  }
+]
