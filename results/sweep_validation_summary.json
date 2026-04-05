@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-04-04 20:40:50.265152",
+  "dataset": "TriviaQA (50-example pilot)",
+  "loss_functions": [
+    "utility",
+    "brier",
+    "cross-entropy"
+  ],
+  "lambda_range": [
+    0.0,
+    0.25
+  ],
+  "num_lambda_points": 51,
+  "results": {
+    "utility": {
+      "max_accuracy": 0.5,
+      "min_accuracy": 0.5,
+      "mean_accuracy": 0.5,
+      "max_coverage": 1.0,
+      "min_coverage": 1.0,
+      "mean_coverage": 1.0,
+      "auc_accuracy": 0.125,
+      "auc_coverage": 0.25,
+      "max_f1": 0.6666666662222221,
+      "optimal_lambda_accuracy": 0.0,
+      "optimal_lambda_f1": 0.0
+    },
+    "brier": {
+      "max_accuracy": 0.9411764705882353,
+      "min_accuracy": 0.0,
+      "mean_accuracy": 0.7115354668566644,
+      "max_coverage": 1.0,
+      "min_coverage": 0.0,
+      "mean_coverage": 0.28901960784313724,
+      "auc_accuracy": 0.1801915440484494,
+      "auc_coverage": 0.0712,
+      "max_f1": 0.6666666662222221,
+      "optimal_lambda_accuracy": 0.16,
+      "optimal_lambda_f1": 0.25
+    },
+    "cross-entropy": {
+      "max_accuracy": 0.9411764705882353,
+      "min_accuracy": 0.0,
+      "mean_accuracy": 0.21873455264458724,
+      "max_coverage": 0.34,
+      "min_coverage": 0.0,
+      "mean_coverage": 0.06705882352941178,
+      "auc_accuracy": 0.05110294117647059,
+      "auc_coverage": 0.01555,
+      "max_f1": 0.49954086278731885,
+      "optimal_lambda_accuracy": 0.0,
+      "optimal_lambda_f1": 0.0
+    }
+  }
+}
