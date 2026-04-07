@@ -78,7 +78,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--lim", type=int, default=50)
     parser.add_argument("--dataset", choices=["triviaqa", "popqa"], default="triviaqa")
+    parser.add_argument("--model", type=str, default="1.5b")
     args = parser.parse_args()
 
     plot_theoretical("fig_thresholds_theoretical.png")
-    plot_reliability(f"results/inference_{args.dataset}_{args.lim}.csv", f"fig_reliability_{args.dataset}_{args.lim}.png")
+    plot_reliability(
+        f"results/inference_{args.dataset}_{args.lim}_{args.model}.csv",
+        f"fig_reliability_{args.dataset}_{args.lim}_{args.model}.png"
+    )
