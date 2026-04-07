@@ -35,13 +35,21 @@ python fetch_data.py --dataset popqa
 llama-server -hf Qwen/Qwen2.5-1.5B-Instruct-GGUF --host 127.0.0.1 --port 4020
 
 # Run inference
-python run_inference.py # testing mode (50 examples), triviaqa, 1.5B defaults
+python run_inference.py # 50 examples, triviaqa, model=1.5b
 python run_inference.py --lim 1000 # 1000 examples
-python run_inference.py --lim 1000 --dataset popqa
+python run_inference.py --lim 1000 --dataset popqa # popqa
+python run_inference.py --lim 500 --model 7b # tag output as 7b (swap model in llama-server first)
 
-# Plot theoretical thresholds
-python gen_plots.py # testing mode (50 examples), triviaqa
-python gen_plots.py --lim 1000 --dataset popqa
+# Run sweep 
+python sweep.py # 50 examples, triviaqa, model=1.5b
+python sweep.py --lim 1000 # full sweep
+python sweep.py --lim 500 --model 7b # sweep 7b results
+
+# Generate plots
+python gen_plots.py # theoretical curves + reliability (50 ex)
+python gen_plots.py --lim 1000 --dataset triviaqa # reliability on full dataset
+python gen_empirical_plots.py # empirical vs theoretical (pilot + full)
+python gen_empirical_plots.py --full-lim 500 --model 7b # compare 7b results
 
 # Run tests
 python run_tests.py
