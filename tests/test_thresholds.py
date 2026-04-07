@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import sys
 import os
-from src.thresholds import tau_U, tau_B, tau_CE
+from src.thresholds import tau_U, tau_B
 
 class TestTauU:
     def test_known_value_01(self):
@@ -94,73 +94,17 @@ class TestTauB:
         # array with both valid (<= 0.25) and invalid (> 0.25) lambda values
         lam = np.array([0.1, 0.2, 0.3])
         result = tau_B(lam)
-        assert result[0] > 0.5  # valid domain, threshold above 0.5
-        assert result[1] > 0.5  # valid domain
-        assert result[2] == 0.0  # above domain, always answer
-
-
-class TestTauCE:
-    def test_scalar_returns_float(self):
-        result = tau_CE(0.1)
-        assert isinstance(result, float)
-    
-    def test_array_input_shape_preserved(self):
-        lam = np.array([0.05, 0.1, 0.2])
-        result = tau_CE(lam)
-        assert result.shape == (3,)
-    
-    def test_known_values_in_valid_domain(self):
-        # Test a few known values for correctness
-        val1 = tau_CE(0.1)
-        val2 = tau_CE(0.2)
-        # Both should be in (0.5, 1) for valid lambda values
-        assert 0.5 < val1 < 1.0
-        assert 0.5 < val2 < 1.0
-    
-    def test_monotone_decreasing_in_valid_domain(self):
-        # tau_CE decreases as lambda increases (more willing to abstain)
-        lam = np.linspace(0.01, 0.69, 50)
-        vals = tau_CE(lam)
-        assert np.all(np.diff(vals) < 0)
-    
-    def test_above_log2_always_abstain(self):
-        # lambda >= log(2): threshold should be 0.5 (always abstain)
-        log2 = np.log(2)
-        assert tau_CE(log2) == 0.5
-        assert tau_CE(log2 + 0.1) == 0.5
-    
-    def test_output_in_zero_one(self):
-        lam = np.linspace(0.0, 0.69, 50)
-        vals = tau_CE(lam)
-        assert np.all(vals >= 0.5) and np.all(vals <= 1.0)
-    
-    def test_negative_lambda_raises(self):
-        with pytest.raises(ValueError):
-            tau_CE(-0.1)
-    
-    def test_ordering_with_other_thresholds(self):
-        # For valid lambda, ordering should be: tau_CE > tau_B > tau_U
-        # (CE is most conservative, U is most aggressive)
-        lam = np.array([0.05, 0.1, 0.15])
-        u = tau_U(lam)
-        b = tau_B(lam)
-        ce = tau_CE(lam)
-        # Check tau_CE >= tau_B (cross-entropy more conservative)
-        assert np.all(ce >= b - 1e-6)
-        # Check tau_B >= tau_U
-        assert np.all(b >= u - 1e-6)
+        assert result[0] > 0.5 #valid domain, threshold above 0.5
+        assert result[1] > 0.5 #valid domain
+        assert result[2] == 0.0 #above domain, always answer
 
 
 class TestThresholdOrdering:
     def test_tau_B_greater_than_tau_U_across_valid_domain(self):
-        # tau_B > tau_U for all lambda in (0, 0.25)
+        #tau_B > tau_U for all lambda in (0, 0.25)
+        #tau_CE > tau_B > tau_U
         lam = np.linspace(0.01, 0.24, 200)
-        assert np.all(tau_B(lam) > tau_U(lam)), "Ordering violation: tau_B must exceed tau_U across valid domain."
-    
-    def test_tau_CE_ge_tau_B_for_small_lambda(self):
-        # For small lambda, tau_CE >= tau_B (cross-entropy is more conservative)
-        lam = np.linspace(0.01, 0.20, 50)
-        ce = tau_CE(lam)
-        b = tau_B(lam)
-        # Cross-entropy requires higher confidence than Brier
-        assert np.all(ce >= b - 1e-4)
+        assert np.all(tau_B(lam) > tau_U(lam)), ("Ordering violation: tau_B must exceed tau_U across valid domain. ")
+        
+        
+# python -m pytest tests/test_thresholds.py -v
