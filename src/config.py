@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import logging
+from src.thresholds import tau_U, tau_B, tau_CE 
 
 SRC_DIR= Path(__file__).resolve().parent
 ROOT_DIR= SRC_DIR.parent
@@ -34,3 +35,9 @@ if not LOGGER.handlers:
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(asctime)s  %(levelname)s  %(message)s"))
     LOGGER.addHandler(handler)
+
+LOSS_FUNCTIONS = {
+    "utility": tau_U,
+    "brier": tau_B,
+    "cross-entropy": tau_CE,
+}

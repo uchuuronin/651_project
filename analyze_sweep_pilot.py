@@ -1,6 +1,6 @@
 """
 Comprehensive validation and analysis of pilot sweep results.
-Task 7: Sweep validation on 50-example pilot dataset.
+Sweep validation on 50-example pilot dataset.
 """
 
 import json
@@ -372,7 +372,7 @@ def main():
     logger.info("=" * 70)
     
     # Load and validate
-    sweep_file = "results/sweep_results_pilot_50.json"
+    sweep_file = "results/sweep_triviaqa_50_1.5b.json"
     sweep = load_and_validate_sweep_results(sweep_file)
     
     # Analyze tradeoffs

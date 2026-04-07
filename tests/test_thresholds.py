@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import sys
 import os
-from src.thresholds import tau_U, tau_B
+from src.thresholds import tau_U, tau_B, tau_CE
 
 class TestTauU:
     def test_known_value_01(self):
@@ -42,6 +42,10 @@ class TestTauU:
         lam = np.linspace(0.0, 10.0, 200)
         vals = tau_U(lam)
         assert np.all(vals >= 0.0) and np.all(vals <= 1.0)
+
+    def test_negative_lambda_raises(self):
+        with pytest.raises(ValueError):
+            tau_U(-0.1)
 
 
 class TestTauB:
@@ -97,7 +101,45 @@ class TestTauB:
         assert result[0] > 0.5 #valid domain, threshold above 0.5
         assert result[1] > 0.5 #valid domain
         assert result[2] == 0.0 #above domain, always answer
+        
+    def test_negative_lambda_raises(self):
+        with pytest.raises(ValueError):
+            tau_B(-0.1)
 
+class TestTauCE:
+    def test_scalar_returns_float(self):
+        result = tau_CE(0.1)
+        assert isinstance(result, float)
+
+    def test_array_input_shape_preserved(self):
+        lam = np.array([0.05, 0.1, 0.2])
+        result = tau_CE(lam)
+        assert result.shape == (3,)
+
+    def test_known_values_in_valid_domain(self):
+        # Both should be in (0.5, 1) for valid lambda values
+        assert 0.5 < tau_CE(0.1) < 1.0
+        assert 0.5 < tau_CE(0.2) < 1.0
+
+    def test_monotone_decreasing_in_valid_domain(self):
+        lam = np.linspace(0.01, 0.69, 50)
+        vals = tau_CE(lam)
+        assert np.all(np.diff(vals) < 0)
+
+    def test_above_log2_returns_half(self):
+        # lambda >= log(2): always abstain, threshold = 0.5
+        log2 = np.log(2)
+        assert tau_CE(log2) == 0.5
+        assert tau_CE(log2 + 0.1) == 0.5
+
+    def test_output_in_valid_range(self):
+        lam = np.linspace(0.0, 0.69, 50)
+        vals = tau_CE(lam)
+        assert np.all(vals >= 0.5) and np.all(vals <= 1.0)
+
+    def test_negative_lambda_raises(self):
+        with pytest.raises(ValueError):
+            tau_CE(-0.1)
 
 class TestThresholdOrdering:
     def test_tau_B_greater_than_tau_U_across_valid_domain(self):
@@ -106,5 +148,16 @@ class TestThresholdOrdering:
         lam = np.linspace(0.01, 0.24, 200)
         assert np.all(tau_B(lam) > tau_U(lam)), ("Ordering violation: tau_B must exceed tau_U across valid domain. ")
         
+    def test_tau_CE_greater_than_tau_B_across_valid_domain(self):
+        # tau_CE > tau_B > tau_U across [0, 0.25]
+        lam = np.linspace(0.01, 0.24, 200)
+        assert np.all(tau_CE(lam) >= tau_B(lam) - 1e-4), \
+            "Ordering violation: tau_CE must exceed tau_B across valid domain."
+ 
+    def test_full_ordering(self):
+        # Spot check at a few known lambda values
+        for lam in [0.05, 0.1, 0.15, 0.2]:
+            u, b, ce = tau_U(lam), tau_B(lam), tau_CE(lam)
+            assert ce >= b >= u, f"Ordering tau_CE >= tau_B >= tau_U violated at lambda={lam}: CE={ce:.3f}, B={b:.3f}, U={u:.3f}"
         
 # python -m pytest tests/test_thresholds.py -v

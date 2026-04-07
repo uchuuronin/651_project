@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """
-Monitor progress of background full inference (Task 8).
+Monitor progress of background full inference.
 Checks checkpoint file and log output to estimate completion time.
 """
 
 import json
 import sys
 from pathlib import Path
+import pandas as pd
 from datetime import datetime
 
 
 def check_progress():
     """Check progress of full 500-example inference."""
-    checkpoint_file = Path("results/checkpoint_full_500_examples.json")
-    log_file = Path("logs/full_inference_500.log")
-    output_file = Path("results/full_500_examples.json")
-    
+    checkpoint_file = Path("results/checkpoint_inference.json")
+    log_file = Path("results/inference.log")
+    output_file = Path("results/inference_triviaqa_1000_1.5b.csv")
+
     if not log_file.exists():
         print("Log file not found. Inference may not have started yet.")
         return
@@ -42,9 +43,8 @@ def check_progress():
     
     # Check if finished
     if output_file.exists():
-        with open(output_file, "r") as f:
-            results = json.load(f)
-        print(f"COMPLETE: {len(results)} examples finished!")
+        df = pd.read_csv(output_file)
+        print(f"COMPLETE: {len(df)} examples finished!")
         return len(results)
     
     return 0
