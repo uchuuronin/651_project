@@ -2,14 +2,14 @@
 
 from pathlib import Path
 import logging
-from src.thresholds import tau_U, tau_B, tau_CE 
+import numpy as np
+from src.thresholds import tau_U, tau_B, tau_CE
 
-SRC_DIR= Path(__file__).resolve().parent
-ROOT_DIR= SRC_DIR.parent
-
-DATA_DIR = ROOT_DIR/"data"
-RESULTS_DIR = ROOT_DIR/"results"   
-LOG_DIR = ROOT_DIR/"logs"
+SRC_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SRC_DIR.parent
+DATA_DIR = ROOT_DIR / "data"
+RESULTS_DIR = ROOT_DIR / "results"
+LOG_DIR = ROOT_DIR / "logs"
 
 def csv_path(model_tag: str, dataset: str) -> Path:
     return RESULTS_DIR / f"inference_{model_tag}_{dataset}.csv"
@@ -20,12 +20,13 @@ def fig_path(name: str) -> Path:
 def setup_dirs():
     for d in [DATA_DIR, RESULTS_DIR, LOG_DIR]:
         d.mkdir(parents=True, exist_ok=True)
-        
-N_EXAMPLES= 500
-N_PILOT= 50
 
-LAMBDA_GRID = [0.05, 0.1, 0.15, 0.2, 0.25]
-TAU_GRID= [i / 100 for i in range(1, 100)]
+N_EXAMPLES = 500
+N_PILOT = 50
+
+# Fine grids used by both AbstractionSweep and grid search
+LAMBDA_GRID = np.linspace(0.0, 0.25, 51)   # 51 points: 0, 0.005, ..., 0.25
+TAU_GRID = np.linspace(0.01, 0.99, 200)     # 200 points for grid search resolution
 
 LOGGER = logging.getLogger("cs651")
 LOGGER.setLevel(logging.INFO)
