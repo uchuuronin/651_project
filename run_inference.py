@@ -1,315 +1,80 @@
-#!/usr/bin/env python3
-"""
-Generate model inference predictions on TriviaQA dataset.
-Creates pilot dataset for abstention threshold evaluation.
-"""
+# Runs inference via llama-server and saves results CSV.
+# Start server before running:
+#   llama-server -hf Qwen/Qwen2.5-1.5B-Instruct-GGUF --host 127.0.0.1 --port 4020
 
-import argparse
 import json
-import logging
-import os
-from pathlib import Path
-from typing import Any, Dict, List
+import argparse
+import pandas as pd
+from src.config import DATA_DIR, RESULTS_DIR, LOGGER
+from src.llama_cpp import LlamaCppPipeline
 
-import numpy as np
-import requests
-
-from src.llama_cpp import LlamaServerClient
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-)
-logger = logging.getLogger(__name__)
+DEFAULT_LIM = 50
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 4020
+CSV_COLUMNS = ["question", "answer_pred", "correct","token_prob_first", "token_prob_mean", "verbalized_conf"]
+DATASET_FILES = {
+    "triviaqa":"triviaqa_full.csv",
+    "popqa":"popqa_full.csv",
+}
 
 
-def load_triviaqa_pilot(
-    split: str = "validation",
-    num_examples: int = 50,
-    seed: int = 42,
-) -> List[Dict[str, Any]]:
-    """
-    Load TriviaQA dataset examples. Falls back to synthetic data if HF unavailable.
-
-    Args:
-        split: Dataset split ("validation" or "train")
-        num_examples: Number of examples to load
-        seed: Random seed for reproducibility
-
-    Returns:
-        List of question dicts with 'question', 'answers', 'passage'
-    """
-    np.random.seed(seed)
-
-    try:
-        from datasets import load_dataset
-        logger.info(f"Loading TriviaQA {split} split ({num_examples} examples)...")
-        dataset = load_dataset("trivia_qa", "rc.nocontext", split=split, trust_remote_code=True)
-
-        # Sample examples
-        indices = np.random.choice(len(dataset), size=min(num_examples, len(dataset)), replace=False)
-        examples = [dataset[int(i)] for i in indices]
-
-        logger.info(f"Loaded {len(examples)} TriviaQA examples")
-        return examples
-
-    except (ImportError, Exception) as e:
-        logger.warning(f"Could not load TriviaQA from HuggingFace ({e}). Using synthetic data.")
-        return _generate_synthetic_triviaqa(num_examples, seed)
+def load_data(dataset: str, n: int) -> pd.DataFrame:
+    path = DATA_DIR / dataset / DATASET_FILES[dataset]
+    if not path.exists():
+        raise FileNotFoundError(f"Dataset not found at {path}. Fetch {dataset}.")
+    df = pd.read_csv(path).head(n)
+    LOGGER.info(f"Loaded {len(df)} examples from {path}")
+    return df
 
 
-def _generate_synthetic_triviaqa(num_examples: int = 50, seed: int = 42) -> List[Dict[str, Any]]:
-    """
-    Generate synthetic TriviaQA-like data for testing.
-
-    Args:
-        num_examples: Number of synthetic examples to generate
-        seed: Random seed
-
-    Returns:
-        List of question dicts
-    """
-    np.random.seed(seed)
-
-    question_templates = [
-        "What is the capital of {}?",
-        "Who won the {} World Cup?",
-        "In which year was {} founded?",
-        "What is the population of {}?",
-        "Who invented {}?",
-        "What is the largest {} in the world?",
-        "Which country is home to {}?",
-        "What is the significance of {}?",
-    ]
-
-    entities = [
-        "France", "Brazil", "Germany", "Italy", "Spain",
-        "Tokyo", "New York", "London", "Paris", "Berlin",
-        "The Internet", "The Telephone", "The Steam Engine",
-        "Mount Everest", "The Amazon", "The Sahara",
-    ]
-
-    examples = []
-    for i in range(num_examples):
-        template_idx = i % len(question_templates)
-        entity_idx = (i * 3) % len(entities)
-        answer_idx = (i * 7) % len(entities)
-
-        question = question_templates[template_idx].format(entities[entity_idx])
-        answer = entities[answer_idx]
-        passage = f"This is a passage about {entities[entity_idx]}. It mentions {answer}."
-
-        examples.append({
-            "question": question,
-            "answers": {"text": [answer]},
-            "passage": passage,
-        })
-
-    logger.info(f"Generated {len(examples)} synthetic TriviaQA-like examples")
-    return examples
+def is_correct(predicted: str, aliases_json: str) -> bool:
+    # Alias matching (not plain exact match)
+    if not predicted:
+        return False
+    aliases = json.loads(aliases_json)
+    pred = predicted.lower().strip()
+    return any(pred == a or a in pred or pred in a for a in aliases)
 
 
-def run_inference(
-    client: LlamaServerClient,
-    examples: List[Dict[str, Any]],
-    temperature: float = 0.7,
-    max_tokens: int = 100,
-) -> List[Dict[str, Any]]:
-    """
-    Run inference on TriviaQA examples.
+def run_inference(dataset: str, lim: int, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT):
+    out_path = RESULTS_DIR / f"inference_{dataset}_{lim}.csv"
+    if out_path.exists():
+        LOGGER.info(f"Results already exist at {out_path}. Skipping inference.")
+        return
 
-    Args:
-        client: LlamaServerClient instance
-        examples: List of TriviaQA examples
-        temperature: Sampling temperature
-        max_tokens: Maximum tokens to generate
+    df =load_data(dataset, lim)
 
-    Returns:
-        List of result dicts with question, answer, prediction, confidence
-    """
-    results = []
+    pipeline = LlamaCppPipeline(host=host, port=port)
+    pipeline.load_model()
 
-    logger.info(f"Running inference on {len(examples)} examples...")
+    questions = df["question"].tolist()
+    results =pipeline.run(questions)
 
-    for i, example in enumerate(examples):
-        question = example.get("question", "")
-        passage = example.get("passage", "")
-        
-        # Extract ground truth from TriviaQA answer field
-        answer_data = example.get("answer", {})
-        if isinstance(answer_data, dict):
-            ground_truth = answer_data.get("value", "")
-        elif isinstance(answer_data, list) and len(answer_data) > 0:
-            gt_item = answer_data[0]
-            ground_truth = gt_item.get("value", "") if isinstance(gt_item, dict) else str(gt_item)
-        else:
-            ground_truth = ""
+    # evaluate correctness against aliases
+    for result, (_, row) in zip(results,df.iterrows()):
+        result["correct"] =is_correct(result["answer_pred"], row["aliases"])
 
-        # Create prompt (extractive QA format)
-        prompt = f"""Context: {passage}
+    results_df = pd.DataFrame(results, columns=CSV_COLUMNS)
+    results_df.to_csv(out_path, index=False)
+    LOGGER.info(f"Saved {len(results_df)} rows to {out_path}")
 
-Question: {question}
-
-Answer:"""
-
-        try:
-            # Call model
-            messages = [{"role": "user", "content": prompt}]
-            response = client.chat_completion(
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
-
-            prediction = response["choices"][0]["message"]["content"].strip()
-
-            # Simple confidence: check if first token matches ground truth (heuristic)
-            # In practice, could use model's logit scores if available
-            confidence = _estimate_confidence(prediction, ground_truth)
-
-            results.append({
-                "question": question,
-                "ground_truth": ground_truth,
-                "prediction": prediction,
-                "confidence": confidence,
-                "prompt": prompt,
-            })
-
-            if (i + 1) % 10 == 0:
-                logger.info(f"Processed {i+1}/{len(examples)} examples")
-
-        except Exception as e:
-            logger.error(f"Error processing example {i}: {e}")
-            results.append({
-                "question": question,
-                "ground_truth": ground_truth,
-                "prediction": "",
-                "confidence": 0.5,
-                "error": str(e),
-            })
-
-    logger.info(f"Inference complete. {len(results)} results.")
-    return results
-
-
-def _estimate_confidence(prediction: str, ground_truth: str) -> float:
-    """
-    Estimate model confidence (heuristic for calibration).
-
-    Args:
-        prediction: Model's predicted answer
-        ground_truth: Ground truth answer
-
-    Returns:
-        Confidence score between 0 and 1
-    """
-    # Simple heuristic: check for length and token overlap
-    if not prediction or not ground_truth:
-        return 0.5
-
-    pred_tokens = set(prediction.lower().split())
-    truth_tokens = set(ground_truth.lower().split())
-
-    if len(truth_tokens) == 0:
-        return 0.5
-
-    overlap = len(pred_tokens & truth_tokens) / len(truth_tokens)
-
-    # Map overlap to rough confidence [0.5, 0.95]
-    confidence = 0.5 + 0.45 * overlap
-
-    return float(confidence)
-
-
-def save_results(results: List[Dict[str, Any]], output_path: Path) -> None:
-    """
-    Save inference results to JSON file.
-
-    Args:
-        results: List of result dicts
-        output_path: Path to save JSON
-    """
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(output_path, "w") as f:
-        json.dump(results, f, indent=2)
-
-    logger.info(f"Saved {len(results)} results to {output_path}")
+    accuracy = results_df["correct"].mean()
+    conf_null = results_df["verbalized_conf"].isna().mean()
+    LOGGER.info(f"Accuracy: {accuracy:.3f}")
+    LOGGER.info(f"Verbalized conf missing: {conf_null:.1%}; {'Signal unusable' if conf_null > 0.5 else 'OK'}"
+    )
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate TriviaQA pilot inference dataset"
-    )
-    parser.add_argument(
-        "--num-examples",
-        type=int,
-        default=50,
-        help="Number of examples for pilot (default: 50)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=Path("results"),
-        help="Output directory for results (default: results/)",
-    )
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        default=0.7,
-        help="Sampling temperature (default: 0.7)",
-    )
-    parser.add_argument(
-        "--max-tokens",
-        type=int,
-        default=100,
-        help="Maximum tokens to generate (default: 100)",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="Random seed (default: 42)",
-    )
-    parser.add_argument(
-        "--server-url",
-        type=str,
-        default="http://127.0.0.1:4020",
-        help="llama-server URL (default: http://127.0.0.1:4020)",
-    )
-
+    parser = argparse.ArgumentParser(description="Run inference for abstention experiments.")
+    parser.add_argument("--lim", type=int, default=DEFAULT_LIM,help=f"Number of examples (default: {DEFAULT_LIM})")
+    parser.add_argument("--dataset", choices=["triviaqa", "popqa"], default="triviaqa")
+    parser.add_argument("--host", default=DEFAULT_HOST)
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     args = parser.parse_args()
 
-    # Initialize client and wait for server
-    logger.info(f"Connecting to llama-server at {args.server_url}...")
-    client = LlamaServerClient(base_url=args.server_url)
-
-    if not client.wait_for_server(max_retries=60, retry_delay=1.0):
-        logger.error("llama-server is not available")
-        return 1
-
-    # Load examples
-    examples = load_triviaqa_pilot(
-        split="validation",
-        num_examples=args.num_examples,
-        seed=args.seed,
-    )
-
-    # Run inference
-    results = run_inference(
-        client=client,
-        examples=examples,
-        temperature=args.temperature,
-        max_tokens=args.max_tokens,
-    )
-
-    # Save results
-    output_path = args.output_dir / f"pilot_{args.num_examples}_examples.json"
-    save_results(results, output_path)
-
-    logger.info(f"Pilot inference complete ({len(results)} examples)")
-    return 0
+    run_inference(dataset=args.dataset, lim=args.lim, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":
-    exit(main())
+    main()
