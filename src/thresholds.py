@@ -1,11 +1,11 @@
 # Closed-form optimal abstention thresholds under three loss functions.
-# Implements tau_U and tau_B (TODO: tau_CE).
+# Implements tau_U, tau_B, and tau_CE.
 #
 # All functions accept scalar or numpy array input and return the same type.
 
 import numpy as np
 import scipy.optimize as opt
-
+from scipy.optimize import brentq
 
 def tau_U(lam):
     """
@@ -49,5 +49,39 @@ def tau_B(lam):
 
     return float(out[0]) if scalar else out
 
-
-# TODO: tau_CE
+ 
+def tau_CE(lam):
+    """
+    Optimal abstention threshold under cross-entropy (log loss).
+ 
+    Derived from: answer iff H(c) <= lambda, where H(c) is binary entropy.
+    H(c) = -c*log(c) - (1-c)*log(1-c).
+ 
+    H is strictly decreasing on [0.5, 1], so H^{-1} is well-defined.
+    Domain: lambda in [0, log(2) ≈ 0.693]. Above log(2): always abstain.
+ 
+    Computed numerically via scipy.optimize.brentq for robust root-finding.
+    """
+    def H(c):
+        """Binary entropy function with numerical stability."""
+        return -c * np.log(c + 1e-12) - (1 - c) * np.log(1 - c + 1e-12)
+ 
+    def tau_CE_single(l):
+        """Scalar version: returns single threshold value."""
+        log2 = np.log(2)
+        if l >= log2:
+            return 0.5  # Always abstain when cost exceeds max entropy
+        try:
+            return brentq(lambda c: H(c) - l, 0.5 + 1e-9, 1.0 - 1e-9)
+        except ValueError:
+            return 0.75
+ 
+    scalar = np.isscalar(lam)
+    lam = np.atleast_1d(np.asarray(lam, dtype=float))
+ 
+    if np.any(lam < 0):
+        raise ValueError(f"lambda must be >= 0, got {lam[lam < 0]}")
+ 
+    out = np.array([tau_CE_single(l) for l in lam])
+ 
+    return float(out[0]) if scalar else out
