@@ -41,7 +41,7 @@ python run_inference.py --lim 1000 --dataset popqa # popqa
 python run_inference.py --lim 500 --model 7b # tag output as 7b (swap model in llama-server first)
 
 # Run sweep 
-python sweep.py 
+python sweep.py # 50 examples, triviaqa, model=1.5b
 python sweep.py --lim 1000 # full sweep
 python sweep.py --lim 500 --model 7b # sweep 7b results
 
