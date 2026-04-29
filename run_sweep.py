@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_LIM = 50
 DEFAULT_MODEL = "1.5b"
+DEFAULT_SIGNAL = "token_prob_first"
 
 def main():
     parser = argparse.ArgumentParser(description="Run abstention sweep + grid search on inference CSV.")
@@ -24,25 +25,30 @@ def main():
     parser.add_argument("--dataset", choices=["triviaqa", "popqa"], default="triviaqa")
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help=f"Model tag for output filename (default: {DEFAULT_MODEL}). "
                         f"Does not change which model llama-server loads, set that when starting llama-server.")
+    parser.add_argument("--signal", type=str, default=DEFAULT_SIGNAL, choices=["token_prob_first", "token_prob_mean"], 
+                        help=f"Confidence signal column to use (default: {DEFAULT_SIGNAL})")
     args = parser.parse_args()
 
     # Input CSV: results/inference_{dataset}_{lim}_{model}.csv
     inference_file = Path(f"results/inference_{args.dataset}_{args.lim}_{args.model}.csv")
-    # Output JSON: results/sweep_{dataset}_{lim}_{model}.json (for sweep results) and results/mae_{dataset}_{lim}_{model}.json (for grid search results)
-    sweep_file = Path(f"results/sweep_{args.dataset}_{args.lim}_{args.model}.json")
-    mae_file = Path(f"results/mae_{args.dataset}_{args.lim}_{args.model}.json")
-    logger.info(f"SWEEP + GRID SEARCH: {args.dataset} | n={args.lim} | model={args.model}")
+
+    # Output filenames include signal tag when not default
+    signal_tag = f"_{args.signal}" if args.signal != DEFAULT_SIGNAL else ""
+    sweep_file = Path(f"results/sweep_{args.dataset}_{args.lim}_{args.model}{signal_tag}.json")
+    mae_file = Path(f"results/mae_{args.dataset}_{args.lim}_{args.model}{signal_tag}.json")
+
+    logger.info(f"SWEEP + GRID SEARCH: {args.dataset} | n={args.lim} | model={args.model} | signal={args.signal}")
 
     if not inference_file.exists():
         logger.error(f"Inference file not found: {inference_file}")
         logger.error(f"Generate it with: python run_inference.py --lim {args.lim} --dataset {args.dataset} --model {args.model}")
         return 1
 
-    df = pd.read_csv(inference_file).dropna(subset=["token_prob_first"])
-    confidences = df["token_prob_first"].values
+    df = pd.read_csv(inference_file).dropna(subset=[args.signal])
+    confidences = df[args.signal].values
     correct = df["correct"].astype(float).values
 
-    logger.info(f"Loaded {len(df)} examples")
+    logger.info(f"Loaded {len(df)} examples (signal={args.signal})")
     logger.info(f"\tConfidence mean={confidences.mean():.3f} range=[{confidences.min():.3f}, {confidences.max():.3f}]")
     logger.info(f"\tAccuracy: {correct.mean():.1%} ({int(correct.sum())}/{len(correct)})")
 

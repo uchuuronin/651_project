@@ -41,7 +41,7 @@ python run_inference.py --lim 1000 --dataset popqa # popqa
 python run_inference.py --lim 500 --model 7b # tag output as 7b (swap model in llama-server first)
 
 # Run sweep 
-python sweep.py # 50 examples, triviaqa, model=1.5b
+python sweep.py 
 python sweep.py --lim 1000 # full sweep
 python sweep.py --lim 500 --model 7b # sweep 7b results
 
@@ -50,6 +50,23 @@ python gen_plots.py # theoretical curves + reliability (50 ex)
 python gen_plots.py --lim 1000 --dataset triviaqa # reliability on full dataset
 python gen_empirical_plots.py # empirical vs theoretical (pilot + full)
 python gen_empirical_plots.py --full-lim 500 --model 7b # compare 7b results
+
+# Run sweep + grid search
+python run_sweep.py --lim 1000 # 50 examples, triviaqa, model=1.5b + default signal: token_prob_first
+python run_sweep.py --lim 1000 --model 7b
+python run_sweep.py --lim 1000 --signal token_prob_mean # alternate confidence signal
+
+# ECE (calibration error)
+python compute_ece.py --lim 1000 --dataset triviaqa --model 1.5b
+python compute_ece.py --lim 1000 --dataset triviaqa --model 7b
+
+# Utility recovery (regret vs oracle)
+python utility_recovery.py --lim 1000 --dataset triviaqa --model 1.5b
+python utility_recovery.py --lim 1000 --dataset triviaqa --model 7b
+
+# Bootstrap CIs for MAE
+python bootstrap_mae.py --lim 1000 --dataset triviaqa --model 1.5b
+python bootstrap_mae.py --lim 1000 --dataset triviaqa --model 7b
 
 # Run tests
 python run_tests.py
