@@ -73,12 +73,17 @@ def fetch(dataset: str):
                 "aliases":json.dumps(aliases),
             })
         elif dataset == "popqa":
-            aliases = [normalize_answer(a) for a in example.get("possible_answers", [])]
+            raw_answer = example.get("obj_label", "")
+            possible = example.get("possible_answers", "")
+            if isinstance(possible, str):
+                aliases = [normalize_answer(a) for a in possible.split(";") if a.strip()]
+            else:
+                aliases = [normalize_answer(a) for a in (possible or [])]
             rows.append({
                 "question_id": example.get("id", ""),
                 "question": example["question"],
-                "answer":normalize_answer(example["answer"]),
-                "aliases":json.dumps(list(set(aliases))),
+                "answer": normalize_answer(raw_answer),
+                "aliases": json.dumps(list(set(aliases))),
             })
         else:
             raise ValueError(f"Unknown dataset: {dataset}")
