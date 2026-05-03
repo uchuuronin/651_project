@@ -41,9 +41,9 @@ python run_inference.py --lim 1000 --dataset popqa # popqa
 python run_inference.py --lim 500 --model 7b # tag output as 7b (swap model in llama-server first)
 
 # Run sweep 
-python sweep.py # 50 examples, triviaqa, model=1.5b
-python sweep.py --lim 1000 # full sweep
-python sweep.py --lim 500 --model 7b # sweep 7b results
+python run_sweep.py # 50 examples, triviaqa, model=1.5b
+python run_sweep.py --lim 1000 # full sweep
+python run_sweep.py --lim 500 --model 7b # sweep 7b results
 
 # Generate plots
 python gen_plots.py # theoretical curves + reliability (50 ex)
@@ -59,6 +59,10 @@ python run_sweep.py --lim 1000 --signal token_prob_mean # alternate confidence s
 # ECE (calibration error)
 python compute_ece.py --lim 1000 --dataset triviaqa --model 1.5b
 python compute_ece.py --lim 1000 --dataset triviaqa --model 7b
+
+# Temperature scaling sensitivity
+python temp_scaling.py --lim 1000 --dataset triviaqa --model 1.5b --signal token_prob_first
+python temp_scaling.py --lim 1000 --dataset triviaqa --model 1.5b --signal token_prob_mean
 
 # Utility recovery (regret vs oracle)
 python utility_recovery.py --lim 1000 --dataset triviaqa --model 1.5b
