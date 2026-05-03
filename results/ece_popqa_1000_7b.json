@@ -1,0 +1,148 @@
+{
+  "dataset": "popqa",
+  "model": "7b",
+  "lim": 1000,
+  "n_bins": 10,
+  "signals": {
+    "token_prob_first": {
+      "ece": 0.3596928656555759,
+      "num_examples": 1000,
+      "bin_details": [
+        {
+          "bin": 0,
+          "count": 28,
+          "mean_confidence": 0.08403256930405034,
+          "mean_accuracy": 0.07142857142857142,
+          "gap": 0.012603997875478917,
+          "weight": 0.028
+        },
+        {
+          "bin": 1,
+          "count": 205,
+          "mean_confidence": 0.14908108902637554,
+          "mean_accuracy": 0.004878048780487805,
+          "gap": 0.14420304024588773,
+          "weight": 0.205
+        },
+        {
+          "bin": 2,
+          "count": 186,
+          "mean_confidence": 0.25083047810685544,
+          "mean_accuracy": 0.021505376344086023,
+          "gap": 0.2293251017627694,
+          "weight": 0.186
+        },
+        {
+          "bin": 3,
+          "count": 108,
+          "mean_confidence": 0.3479457258548566,
+          "mean_accuracy": 0.018518518518518517,
+          "gap": 0.3294272073363381,
+          "weight": 0.108
+        },
+        {
+          "bin": 4,
+          "count": 118,
+          "mean_confidence": 0.4461503110445769,
+          "mean_accuracy": 0.07627118644067797,
+          "gap": 0.36987912460389893,
+          "weight": 0.118
+        },
+        {
+          "bin": 5,
+          "count": 91,
+          "mean_confidence": 0.5437403546033763,
+          "mean_accuracy": 0.06593406593406594,
+          "gap": 0.4778062886693104,
+          "weight": 0.091
+        },
+        {
+          "bin": 6,
+          "count": 69,
+          "mean_confidence": 0.6521746719694755,
+          "mean_accuracy": 0.08695652173913043,
+          "gap": 0.565218150230345,
+          "weight": 0.069
+        },
+        {
+          "bin": 7,
+          "count": 65,
+          "mean_confidence": 0.753715402376066,
+          "mean_accuracy": 0.12307692307692308,
+          "gap": 0.630638479299143,
+          "weight": 0.065
+        },
+        {
+          "bin": 8,
+          "count": 50,
+          "mean_confidence": 0.8468357696755704,
+          "mean_accuracy": 0.12,
+          "gap": 0.7268357696755704,
+          "weight": 0.05
+        },
+        {
+          "bin": 9,
+          "count": 80,
+          "mean_confidence": 0.9510784021021497,
+          "mean_accuracy": 0.35,
+          "gap": 0.6010784021021497,
+          "weight": 0.08
+        }
+      ]
+    },
+    "token_prob_mean": {
+      "ece": 0.6824383423362111,
+      "num_examples": 1000,
+      "bin_details": [
+        {
+          "bin": 4,
+          "count": 6,
+          "mean_confidence": 0.44604117338278376,
+          "mean_accuracy": 0.0,
+          "gap": 0.44604117338278376,
+          "weight": 0.006
+        },
+        {
+          "bin": 5,
+          "count": 24,
+          "mean_confidence": 0.5677671350494107,
+          "mean_accuracy": 0.0,
+          "gap": 0.5677671350494107,
+          "weight": 0.024
+        },
+        {
+          "bin": 6,
+          "count": 206,
+          "mean_confidence": 0.66628886566107,
+          "mean_accuracy": 0.019417475728155338,
+          "gap": 0.6468713899329147,
+          "weight": 0.206
+        },
+        {
+          "bin": 7,
+          "count": 463,
+          "mean_confidence": 0.7537190825801838,
+          "mean_accuracy": 0.04103671706263499,
+          "gap": 0.7126823655175488,
+          "weight": 0.463
+        },
+        {
+          "bin": 8,
+          "count": 296,
+          "mean_confidence": 0.8356441402718694,
+          "mean_accuracy": 0.1554054054054054,
+          "gap": 0.680238734866464,
+          "weight": 0.296
+        },
+        {
+          "bin": 9,
+          "count": 5,
+          "mean_confidence": 0.9115153946899502,
+          "mean_accuracy": 0.6,
+          "gap": 0.31151539468995026,
+          "weight": 0.005
+        }
+      ]
+    }
+  }
+}
