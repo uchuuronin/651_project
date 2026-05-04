@@ -1,0 +1,18 @@
+{
+  "dataset": "popqa",
+  "model": "7b",
+  "lim": 1000,
+  "signal": "token_prob_mean",
+  "temperature": 22026.465794806718,
+  "nll": 0.6931686622473137,
+  "before": {
+    "mean_mae_tau_U": 0.29243572349101093,
+    "mean_mae_tau_B": 0.11417061474975154,
+    "mean_mae_tau_CE": 0.049819877059277255
+  },
+  "after": {
+    "mean_mae_tau_U": 0.09787034331017257,
+    "mean_mae_tau_B": 0.32905353507801643,
+    "mean_mae_tau_CE": 0.46305664915505024
+  }
+}

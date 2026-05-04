@@ -1,0 +1,18 @@
+{
+  "dataset": "triviaqa",
+  "model": "7b",
+  "lim": 1000,
+  "signal": "token_prob_mean",
+  "temperature": 56.4624271783574,
+  "nll": 0.6930510006656089,
+  "before": {
+    "mean_mae_tau_U": 0.2646903438784518,
+    "mean_mae_tau_B": 0.12102935922080076,
+    "mean_mae_tau_CE": 0.023618431869252773
+  },
+  "after": {
+    "mean_mae_tau_U": 0.09787034331017257,
+    "mean_mae_tau_B": 0.30558915435085116,
+    "mean_mae_tau_CE": 0.4384335335771607
+  }
+}
