@@ -1,12 +1,14 @@
 # Inference backend for models running via llama-server (llama.cpp).
 #
 # Start server before running:
-#  llama-server -hf Qwen/Qwen3-8B-GGUF --host 127.0.0.1 --port 4568
+#   Qwen:  llama-server -hf Qwen/Qwen2.5-7B-Instruct-GGUF --host 127.0.0.1 --port 4020
+#   Llama: llama-server -hf bartowski/Meta-Llama-3.1-8B-Instruct-GGUF --host 127.0.0.1 --port 4020
 
 import re
 import requests
 from src.config import LOGGER
 
+_STOP_TOKENS = ["<|im_end|>", "<|eot_id|>", "<|end_of_text|>", "\nQuestion:", "\n\n"]
 
 class LlamaCppPipeline:
     def __init__(self, host: str = "127.0.0.1", port: int = 4020):
@@ -60,6 +62,7 @@ class LlamaCppPipeline:
                     "n_predict": 60,
                     "n_probs": 1,
                     "stream": False,
+                    "stop": _STOP_TOKENS,
                 },
                 timeout=30,
             )
@@ -112,7 +115,6 @@ class LlamaCppPipeline:
         except Exception as e:
             LOGGER.warning(f"Token prob extraction failed: {e}")
             return None, None    
-
 
     def _empty_result(self, question: str) -> dict:
         return {
